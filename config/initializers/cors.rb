@@ -11,6 +11,6 @@ Rails.application.config.middleware.insert_before 0, Rack::Cors do
 
     resource '*',
       headers: :any,
-      methods: [:get, :post, :put, :delete] # :patch, :options, :head are not necessary in moment
+      methods: [:get, :post, :put, :delete] # :patch, :options, :head não são necessárias no momento
   end
 end
