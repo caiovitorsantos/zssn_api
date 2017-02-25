@@ -20,7 +20,7 @@ class UsersController < ApplicationController
   def create
   	@user = User.new(users_params)
   	if @user.save
-  		render json: :success, status: 200
+  		render json: :success, status: 201
   	else
   		render json: @user.errors, status: :unprocessable_entity
   	end
@@ -53,7 +53,7 @@ class UsersController < ApplicationController
 
   def inventory
   	unless @user.healthy
-  	 	render json: [:denied_access, "User are contaminated"], status: 403
+  	 	render json: [:denied_access, "User is contaminated"], status: 403
   	else
   		@inventory = Inventory.where(user_id: @user.id)
   		render json: @inventory
