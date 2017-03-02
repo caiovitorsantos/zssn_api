@@ -69,13 +69,38 @@ class InventoriesController < ApplicationController
 		end
 	end
 
+	# POST /inventories/:exchange
+	# POST /inventories/:exchange.json
+	def exchange
+		data_origin, data_destiny = origin_params, destiny_params
+
+		unless (User.healthy?(data_origin[:user_id]) && User.healthy?(data_destiny[:user_id]))
+  		render json: [:denied_access, "User is contaminated"], status: 403 and return
+		end
+
+		unless Inventory.equality(data_origin, data_destiny)
+			render json: [:error, "The item points are not the same"], status: 400 and return
+		end
+
+		render json: :success, status: 200
+
+	end
+
 	private
+		def set_inventoy
+			@inventory = Inventory.where(params.require(:inventory).permit(:user_id, :kind)).first
+		end
+
 		def inventory_params
 			params.require(:inventory).permit(:user_id, :kind, :amount)
 		end
 
-		def set_inventoy
-			@inventory = Inventory.where(params.require(:inventory).permit(:user_id, :kind)).first
+		def origin_params  
+  		params.require(:origin).permit(:user_id, items: [:kind, :amount]) 
+		end
+
+		def destiny_params
+			params.require(:destiny).permit(:user_id, items: [:kind, :amount])
 		end
 
 end
