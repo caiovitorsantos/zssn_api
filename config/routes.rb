@@ -7,6 +7,8 @@ Rails.application.routes.draw do
 		end
 	end
 
+
+	post 'exchange', to: 'inventories#exchange'
 	resources :inventories do
 		member do
 			post 'add', to: 'inventories#add'
