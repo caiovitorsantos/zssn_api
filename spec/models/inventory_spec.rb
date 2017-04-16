@@ -23,7 +23,7 @@ RSpec.describe Inventory, type: :model do
 
 		context	"without all required values" do 
 			before do
-				@user = create(:user, healthy: true, count_report: rand(0..2))
+				@user = create(:user, healthy: true, count_report: 0)
 			end
 
 			it "don't save the inventory without the kind" do
@@ -44,7 +44,7 @@ RSpec.describe Inventory, type: :model do
 	end
 
 	describe "#add" do
-		context "with healthy user and without report" do 	
+		context "with healthy user and without reports" do 	
 			before do			
 				@user = create(:user, healthy: true, count_report: 0)
 				@inventory = create(:inventory, user: @user)
@@ -65,12 +65,13 @@ RSpec.describe Inventory, type: :model do
 
 			it "it will not be able to add" do
 				expect(@inventory.add(5)).to eql(false)
+				expect(@inventory.errors.messages[:user_id][0]).to eql("The user is infected")
 			end
 		end
 	end
 
 	describe "#remove" do
-		context "with healthy user and without report" do 	
+		context "with healthy user and without reports" do 	
 			before do			
 				@user = create(:user, healthy: true, count_report: 0)
 				@inventory = create(:inventory, user: @user, amount: 10)
@@ -87,7 +88,7 @@ RSpec.describe Inventory, type: :model do
 				expect(@inventory.amount).to eql(0)
 			end
 
-			it "Does inventory must not be negative" do
+			it "does inventory must not be negative" do
 				expect(@inventory.remove(@inventory.amount + 1)).to eql(false)
 			end
 		end
@@ -100,8 +101,135 @@ RSpec.describe Inventory, type: :model do
 
 			it "it will not be able to remove" do
 				expect(@inventory.remove(1)).to eql(false)
+				expect(@inventory.errors.messages[:user_id][0]).to eql("The user is infected")
 			end
 		end
+	end
+
+	describe "self #equality" do
+
+		context "with healthy users and without reports" do
+			before do  
+				@user1 = create(:user, healthy: true, count_report: 0)
+				@inventory1 = {user: @user1, kind: 0, amount: 2} 			# 8 points	-	water
+				@inventory2 = {user: @user1, kind: 1, amount: 2}				# 6 points	-	food
+
+				@user2 = create(:user, healthy: true, count_report: 0)
+				@inventory3 = {user: @user2, kind: 2, amount: 4}		# 8 points	-	medicine
+				@inventory4 = {user: @user2, kind: 3, amount: 5}	# 5 points	-	ammunition
+				@inventory5 = {user: @user2, kind: 3, amount: 1}	# 1 point	-	ammunition
+			end
+			
+			it "the inventories has same points number" do
+				origin = { user_id: @user1, items: [{kind: @inventory1[:kind], amount: @inventory1[:amount]},{kind: @inventory2[:kind], amount: @inventory2[:amount]}]}
+				destiny = { user_id: @user2, items: [{kind: @inventory3[:kind], amount: @inventory3[:amount]},{kind: @inventory4[:kind], amount: @inventory4[:amount]}, {kind: @inventory5[:kind], amount: @inventory5[:amount]}]}
+
+				expect(Inventory.equality(origin, destiny)).to eql(true)				
+			end
+
+
+			it "the inventories has no same points number" do
+				origin = { user_id: @user1, items: [{kind: @inventory1[:kind], amount: @inventory1[:amount]},{kind: @inventory2[:kind], amount: @inventory2[:amount]}]}
+				destiny = { user_id: @user2, items: [{kind: @inventory4[:kind], amount: @inventory4[:amount]}, {kind: @inventory5[:kind], amount: @inventory5[:amount]}]}
+
+				expect(Inventory.equality(origin, destiny)).to eql(false)				
+			end
+
+		end
+
+		context "with infected users and with reports" do
+			before do  
+				@user1 = create(:user, healthy: false, count_report: 3)
+				@inventory1 = {user: @user1, kind: 0, amount: 2} 			# 8 points	-	water
+				@inventory2 = {user: @user1, kind: 1, amount: 2}				# 6 points	-	food
+
+				@user2 = create(:user, healthy: false, count_report: 3)
+				@inventory3 = {user: @user2, kind: 2, amount: 3}		# 6 points	-	medicine
+				@inventory4 = {user: @user2, kind: 3, amount: 4}	# 4 points	-	ammunition
+				@inventory5 = {user: @user2, kind: 0, amount: 1}	# 4 point	-	ammunition
+			end
+			
+			it "user is infected" do
+				origin = { user_id: @user1, items: [{kind: @inventory1[:kind], amount: @inventory1[:amount]},{kind: @inventory2[:kind], amount: @inventory2[:amount]}]}
+				destiny = { user_id: @user2, items: [{kind: @inventory3[:kind], amount: @inventory3[:amount]},{kind: @inventory4[:kind], amount: @inventory4[:amount]}, {kind: @inventory5[:kind], amount: @inventory5[:amount]}]}
+
+				expect(Inventory.equality(origin, destiny)).to eql(false)		
+			end
+
+		end
+	end
+
+	describe "self #exchange" do 
+			before do
+				@user1 = create(:user, healthy: true, count_report: 0)
+				create(:inventory, user: @user1, kind: :water, amount: 2) 		
+				create(:inventory, user: @user1, kind: :food, amount: 2)			
+
+				@user2 = create(:user, healthy: true, count_report: 0)
+				create(:inventory, user: @user2, kind: :medicine, amount: 3)	
+				create(:inventory, user: @user2, kind: :ammunition, amount: 4)
+				create(:inventory, user: @user2, kind: :water, amount: 1)
+			end
+
+
+		context "with healthy users and without reports" do
+			before do
+				@inventory1 = {user: @user1, kind: 0, amount: 2} 			# 8 points	-	water
+				@inventory2 = {user: @user1, kind: 1, amount: 2}				# 6 points	-	food
+
+				@inventory3 = {user: @user2, kind: 2, amount: 3}		# 6 points	-	medicine
+				@inventory4 = {user: @user2, kind: 3, amount: 4}	# 4 points	-	ammunition
+				@inventory5 = {user: @user2, kind: 0, amount: 1}	# 4 point	-	water
+			end
+
+			it "the inventories has no same points number" do
+				origin = { user_id: @user1.id, items: [{kind: @inventory1[:kind], amount: @inventory1[:amount]},{kind: @inventory2[:kind], amount: @inventory2[:amount]}]}
+				destiny = { user_id: @user2.id, items: [{kind: @inventory3[:kind], amount: @inventory3[:amount]}, {kind: @inventory4[:kind], amount: @inventory4[:amount]}, {kind: @inventory5[:kind], amount: @inventory5[:amount]}]}
+
+				Inventory.exchange(origin, destiny)	
+
+				user_origin = User.find(origin[:user_id])
+				user_destiny = User.find(destiny[:user_id])				
+
+				
+				# o usuário 2 recebeu do usuário 1 duas unidades de água
+				expect(user_destiny.inventories.find_by(kind: :water).amount).to eql(@inventory1[:amount])				
+
+				# o usuário 2 recebeu do usuário 1 2 unidades de comida
+				expect(user_destiny.inventories.find_by(kind: :food).amount).to eql(@inventory2[:amount])				
+
+				# o usuário 1 recebeu do usuário 2 três unidades de medicamento
+				expect(user_origin.inventories.find_by(kind: :medicine).amount).to eql(@inventory3[:amount])				
+				
+				# o usuário 1 recebeu do usuário 2 quatro unidades de munição
+				expect(user_origin.inventories.find_by(kind: :ammunition).amount).to eql(@inventory4[:amount])				
+				
+				# o usuário 1 recebeu do usuário 2 uma unidade de água
+				expect(user_origin.inventories.find_by(kind: :water).amount).to eql(@inventory5[:amount])				
+			end
+		end
+
+
+		context "with healthy users and without reports" do
+			before do
+				@user1.update(healthy: false, count_report: 3)
+				@inventory1 = {user: @user1, kind: 0, amount: 2} 			# 8 points	-	water
+				@inventory2 = {user: @user1, kind: 1, amount: 2}				# 6 points	-	food
+
+				@inventory3 = {user: @user2, kind: 2, amount: 3}		# 6 points	-	medicine
+				@inventory4 = {user: @user2, kind: 3, amount: 4}	# 4 points	-	ammunition
+				@inventory5 = {user: @user2, kind: 0, amount: 1}	# 4 point	-	water
+			end
+
+			it "the inventories has no same points number" do
+				origin = { user_id: @user1.id, items: [{kind: @inventory1[:kind], amount: @inventory1[:amount]},{kind: @inventory2[:kind], amount: @inventory2[:amount]}]}
+				destiny = { user_id: @user2.id, items: [{kind: @inventory3[:kind], amount: @inventory3[:amount]}, {kind: @inventory4[:kind], amount: @inventory4[:amount]}, {kind: @inventory5[:kind], amount: @inventory5[:amount]}]}
+			
+				# Usuario 1 está infectado
+				expect(Inventory.exchange(origin, destiny)).to eql(false)				
+			end
+		end
+
 	end
 
 end
