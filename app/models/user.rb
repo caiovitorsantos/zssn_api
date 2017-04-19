@@ -4,14 +4,18 @@ class User < ApplicationRecord
 
 	enum sex: [:man, :woman]
 
-	def set_location(lat, lng)
-		self.latitude = lat
-		self.longitude = lng
+	# Atualiza a localização do usuário 
+	def set_location(local)
+		self.latitude = local[:latitude]
+		self.longitude = local[:longitude]
+		self.save
 	end
 
-	def add_report
-		count_report += 1
-		healthy = false if count_report >= 3
+	# Addiciona reportação de infecção e o status do usuário se tiver 3 ou mais denuncias
+	def report_complaint
+		self.count_report += 1
+		self.healthy = false if count_report >= 3
+		self.save
 	end
 
 	def self.healthy?(user_id)
