@@ -17,6 +17,11 @@ class Inventory < ApplicationRecord
 	# Valida o index unique definido no banco, ou seja, permite que seja inserido apenas um par de valores  
   validates :user_id, uniqueness: { scope: :kind }
 
+  # Retorna ponto do tipo de suprimento do objeto
+  def get_point
+    @@points[Inventory.kinds[self.kind]]
+  end
+
   # Adiciona unidades do item no seu inventário
   def add(amount_inc)
     unless self.user.healthy?
@@ -50,12 +55,13 @@ class Inventory < ApplicationRecord
     points_origin = points_destiny = 0
 
     data_origin[:items].each do |item|
-        points_origin += item[:amount] * @@points[item[:kind]]
+        points_origin += item[:amount].to_i * @@points[Inventory.kinds[item[:kind]]]
     end    
 
     data_destiny[:items].each do |item|
-        points_destiny += item[:amount] * @@points[item[:kind]]
+        points_destiny += item[:amount].to_i * @@points[Inventory.kinds[item[:kind]]]
     end    
+      # binding.pry # puts "\n item: #{item}"
 
     points_origin == points_destiny    
   end
@@ -80,8 +86,8 @@ class Inventory < ApplicationRecord
         user.kind = item[:kind]
         user.amount ||= 0
       end
-      inv_add.amount += item[:amount]
-      inv_sub.amount -= item[:amount]
+      inv_add.amount += item[:amount].to_i
+      inv_sub.amount -= item[:amount].to_i
 
       inv_add.save
       inv_sub.save
