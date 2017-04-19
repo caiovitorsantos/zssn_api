@@ -111,13 +111,13 @@ RSpec.describe Inventory, type: :model do
 		context "with healthy users and without reports" do
 			before do  
 				@user1 = create(:user, healthy: true, count_report: 0)
-				@inventory1 = {user: @user1, kind: 0, amount: 2} 			# 8 points	-	water
-				@inventory2 = {user: @user1, kind: 1, amount: 2}				# 6 points	-	food
+				@inventory1 = {user: @user1, kind: :water, amount: 2} 				# 8 points
+				@inventory2 = {user: @user1, kind: :food, amount: 2}					# 6 points
 
 				@user2 = create(:user, healthy: true, count_report: 0)
-				@inventory3 = {user: @user2, kind: 2, amount: 4}		# 8 points	-	medicine
-				@inventory4 = {user: @user2, kind: 3, amount: 5}	# 5 points	-	ammunition
-				@inventory5 = {user: @user2, kind: 3, amount: 1}	# 1 point	-	ammunition
+				@inventory3 = {user: @user2, kind: :medicine, amount: 4}			# 8 points
+				@inventory4 = {user: @user2, kind: :ammunition, amount: 5}		# 5 points
+				@inventory5 = {user: @user2, kind: :ammunition, amount: 1}		# 1 point 
 			end
 			
 			it "the inventories has same points number" do
@@ -140,13 +140,13 @@ RSpec.describe Inventory, type: :model do
 		context "with infected users and with reports" do
 			before do  
 				@user1 = create(:user, healthy: false, count_report: 3)
-				@inventory1 = {user: @user1, kind: 0, amount: 2} 			# 8 points	-	water
-				@inventory2 = {user: @user1, kind: 1, amount: 2}				# 6 points	-	food
+				@inventory1 = {user: @user1, kind: :water, amount: 2} 			# 8 points
+				@inventory2 = {user: @user1, kind: :food, amount: 2}				# 6 points
 
 				@user2 = create(:user, healthy: false, count_report: 3)
-				@inventory3 = {user: @user2, kind: 2, amount: 3}		# 6 points	-	medicine
-				@inventory4 = {user: @user2, kind: 3, amount: 4}	# 4 points	-	ammunition
-				@inventory5 = {user: @user2, kind: 0, amount: 1}	# 4 point	-	ammunition
+				@inventory3 = {user: @user2, kind: :medicine, amount: 3}		# 6 points
+				@inventory4 = {user: @user2, kind: :ammunition, amount: 4}	# 4 points
+				@inventory5 = {user: @user2, kind: :ammunition, amount: 1}	# 4 point
 			end
 			
 			it "user is infected" do
@@ -160,26 +160,26 @@ RSpec.describe Inventory, type: :model do
 	end
 
 	describe "self #exchange" do 
-			before do
-				@user1 = create(:user, healthy: true, count_report: 0)
-				create(:inventory, user: @user1, kind: :water, amount: 2) 		
-				create(:inventory, user: @user1, kind: :food, amount: 2)			
+		before do
+			@user1 = create(:user, healthy: true, count_report: 0)
+			create(:inventory, user: @user1, kind: :water, amount: 2) 		
+			create(:inventory, user: @user1, kind: :food, amount: 2)			
 
-				@user2 = create(:user, healthy: true, count_report: 0)
-				create(:inventory, user: @user2, kind: :medicine, amount: 3)	
-				create(:inventory, user: @user2, kind: :ammunition, amount: 4)
-				create(:inventory, user: @user2, kind: :water, amount: 1)
-			end
+			@user2 = create(:user, healthy: true, count_report: 0)
+			create(:inventory, user: @user2, kind: :medicine, amount: 3)	
+			create(:inventory, user: @user2, kind: :ammunition, amount: 4)
+			create(:inventory, user: @user2, kind: :water, amount: 1)
+		end
 
 
 		context "with healthy users and without reports" do
 			before do
-				@inventory1 = {user: @user1, kind: 0, amount: 2} 			# 8 points	-	water
-				@inventory2 = {user: @user1, kind: 1, amount: 2}				# 6 points	-	food
+				@inventory1 = {user: @user1, kind: :water, amount: 2} 			# 8 points
+				@inventory2 = {user: @user1, kind: :food, amount: 2}				# 6 points
 
-				@inventory3 = {user: @user2, kind: 2, amount: 3}		# 6 points	-	medicine
-				@inventory4 = {user: @user2, kind: 3, amount: 4}	# 4 points	-	ammunition
-				@inventory5 = {user: @user2, kind: 0, amount: 1}	# 4 point	-	water
+				@inventory3 = {user: @user2, kind: :medicine, amount: 3}		# 6 points
+				@inventory4 = {user: @user2, kind: :ammunition, amount: 4}	# 4 points
+				@inventory5 = {user: @user2, kind: :water, amount: 1}				# 4 points
 			end
 
 			it "the inventories has no same points number" do
@@ -209,16 +209,15 @@ RSpec.describe Inventory, type: :model do
 			end
 		end
 
-
 		context "with healthy users and without reports" do
 			before do
 				@user1.update(healthy: false, count_report: 3)
-				@inventory1 = {user: @user1, kind: 0, amount: 2} 			# 8 points	-	water
-				@inventory2 = {user: @user1, kind: 1, amount: 2}				# 6 points	-	food
+				@inventory1 = {user: @user1, kind: :water, amount: 2} 			# 8 points
+				@inventory2 = {user: @user1, kind: :food, amount: 2}				# 6 points
 
-				@inventory3 = {user: @user2, kind: 2, amount: 3}		# 6 points	-	medicine
-				@inventory4 = {user: @user2, kind: 3, amount: 4}	# 4 points	-	ammunition
-				@inventory5 = {user: @user2, kind: 0, amount: 1}	# 4 point	-	water
+				@inventory3 = {user: @user2, kind: :medicine, amount: 3}		# 6 points
+				@inventory4 = {user: @user2, kind: :ammunition, amount: 4}	# 4 points
+				@inventory5 = {user: @user2, kind: :water, amount: 1}				# 4 points
 			end
 
 			it "the inventories has no same points number" do
@@ -229,7 +228,6 @@ RSpec.describe Inventory, type: :model do
 				expect(Inventory.exchange(origin, destiny)).to eql(false)				
 			end
 		end
-
 	end
 
 end
