@@ -182,7 +182,7 @@ RSpec.describe Inventory, type: :model do
 				@inventory5 = {user: @user2, kind: :water, amount: 1}				# 4 points
 			end
 
-			it "the inventories has no same points number" do
+			it "users exchange items" do
 				origin = { user_id: @user1.id, items: [{kind: @inventory1[:kind], amount: @inventory1[:amount]},{kind: @inventory2[:kind], amount: @inventory2[:amount]}]}
 				destiny = { user_id: @user2.id, items: [{kind: @inventory3[:kind], amount: @inventory3[:amount]}, {kind: @inventory4[:kind], amount: @inventory4[:amount]}, {kind: @inventory5[:kind], amount: @inventory5[:amount]}]}
 
@@ -220,12 +220,12 @@ RSpec.describe Inventory, type: :model do
 				@inventory5 = {user: @user2, kind: :water, amount: 1}				# 4 points
 			end
 
-			it "the inventories has no same points number" do
+			it "the user is infected" do
 				origin = { user_id: @user1.id, items: [{kind: @inventory1[:kind], amount: @inventory1[:amount]},{kind: @inventory2[:kind], amount: @inventory2[:amount]}]}
 				destiny = { user_id: @user2.id, items: [{kind: @inventory3[:kind], amount: @inventory3[:amount]}, {kind: @inventory4[:kind], amount: @inventory4[:amount]}, {kind: @inventory5[:kind], amount: @inventory5[:amount]}]}
 			
 				# Usuario 1 está infectado
-				expect(Inventory.exchange(origin, destiny)).to eql(false)				
+				expect(Inventory.exchange(origin, destiny)[0]).to eql(false)				
 			end
 		end
 	end

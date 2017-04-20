@@ -140,7 +140,7 @@ RSpec.describe InventoriesController, type: :controller do
 
 			it "return the inventory item" do
 				# Exibindo detalhes dos inventários do usuário
-				get :show, params: {inventory: {user_id: @user.id, kind: @inventory.kind}}
+				get :show, params: {id: @inventory.id, inventory: {user_id: @user.id, kind: @inventory.kind}}
 
 				expect(response).to have_http_status(200)
 				expect(JSON.parse(response.body)["id"]).to eql(Inventory.last.id)
@@ -149,7 +149,7 @@ RSpec.describe InventoriesController, type: :controller do
 			it "deny access, because infected user" do
 				# O usuario foi infectado, o usuário não pode ver seu inventário
 				@user.update(healthy: false, count_report: 3)
-				get :show, params: {inventory: {user_id: @user.id, kind: @inventory.kind}}
+				get :show, params: {id: @inventory.id, inventory: {user_id: @user.id, kind: @inventory.kind}}
 
 				expect(JSON.parse(response.body)["error"]).to eql("Denied access. User is contaminated!")
 			end
@@ -253,7 +253,7 @@ RSpec.describe InventoriesController, type: :controller do
 			it "return the inventory item" do
 				delete :destroy, params: {id: @inventory.id, inventory: {user_id: @user.id, kind: @inventory.kind}}
 
-				expect(@inventory).not_to eql(Inventory.last)
+				expect(@inventory.id).not_to eql(Inventory.last.id)
 			end
 		end	
 	end

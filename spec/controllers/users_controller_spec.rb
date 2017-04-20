@@ -20,8 +20,8 @@ RSpec.describe UsersController, type: :controller do
       end
 
       it "returns http success" do
-        post :create
-        expect(response).to have_http_status(:success)
+        post :create, params: {user: {name: FFaker::Name.name, age: 22, sex: :man, healthy: true, count_report: 0, latitude: 22.33234, longitude:  22.33234}}
+        expect(response).to have_http_status(201)
       end
 
       it "save on database" do
@@ -42,12 +42,12 @@ RSpec.describe UsersController, type: :controller do
       end
 
       it "returns http success" do
-        put :update, params: {id: @user.id, user: @user} 
+        put :update, params: {id: @user.id, user: {name: FFaker::Name.name, age: 22, sex: :man, healthy: true, count_report: 0, latitude: 22.33234, longitude:  22.33234}} 
         expect(response).to have_http_status(:success)
       end
 
       it "save on database" do
-        put :update, params: {id: @user.id, user: @user}
+        put :update, params: {id: @user.id, user: {name: FFaker::Name.name, age: 22, sex: :man, healthy: true, count_report: 0, latitude: 22.33234, longitude:  22.33234}}
         user_after_update = User.last
         expect(@user).to eql(user_after_update)
       end
@@ -99,5 +99,26 @@ RSpec.describe UsersController, type: :controller do
       end
     end
   end
+
+  describe "PUT #set_location" do
+    before do
+      request.env["HTTP_ACCEPT"] = "application/json"
+    end
+
+    context "with a healthy user" do
+      before do
+        @user1 = create(:user, healthy: true, count_report: 0)
+      end
+
+      it "report him and make him infected" do
+        lat = FFaker::Geolocation::lat.to_f
+        lng = FFaker::Geolocation::lng.to_f
+        put :set_location, params: {id: @user1.id, user: {latitude: lat, longitude: lng}}
+
+        expect(response).to have_http_status(200)
+      end
+    end
+  end
+
 end
   
