@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-	before_action :set_user, only: [:update, :destroy, :complaint, :inventory]
+	before_action :set_user, only: [:update, :destroy, :complaint, :inventory, :set_location]
 
 	# GET /users
 	# GET /users/index.json
@@ -51,6 +51,8 @@ class UsersController < ApplicationController
     end
   end
 
+  # PUT /users/id/set_location
+  # PUT /users/id/set_location.json
   def set_location
     # Atualiza as informações o usuário
     if @user.set_location(users_location_params) 
@@ -103,8 +105,8 @@ class UsersController < ApplicationController
       .where(users: {healthy: false})
       .each { |inventory| infected_points += inventory.amount * inventory.get_point }
 
-    render json:{ infected_users: infected_user,
-                  healthy_users: healthy_user,
+    render json:{ infected_users: infected_users,
+                  healthy_users: healthy_users,
                   average_inventory_per_user: avg_inventory,
                   points_of_infected_users: infected_points }
   end
@@ -116,11 +118,11 @@ class UsersController < ApplicationController
   	end
 
 	  def users_params
-      params.permit( :name, :age, :sex, :healthy, :count_report, :latitude, :longitude)
+      params.require(:user).permit( :name, :age, :sex, :healthy, :count_report, :latitude, :longitude)
     end
 
     def users_location_params
-	  	params.permit(:id, :latitude, :longitude)
+	  	params.require(:user).permit(:latitude, :longitude)
 	  end
 
 end
