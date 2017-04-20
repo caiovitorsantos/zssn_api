@@ -94,6 +94,7 @@ class Inventory < ApplicationRecord
     end
 
     self.exchange(data_destiny, data_origin, true) unless recursed
+    return true
   end
 
 end
