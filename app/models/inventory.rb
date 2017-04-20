@@ -74,11 +74,11 @@ class Inventory < ApplicationRecord
       inv_sub = Inventory.where(user_id: data_origin[:user_id], kind: item[:kind]).first
 
       if inv_sub.nil?
-        inv_sub.errors.add(:base, "The inventory doesn't exist to remove items") and return false
+        return false, "The inventory doesn't exist to remove items"
       end
 
       unless inv_sub.user.healthy?
-        inv_sub.errors.add(:user_id, "The user is infected") and return false
+        return false, "The user #{inv_sub.user.name} is infected"
       end
 
       inv_add = Inventory.where(user_id: data_destiny[:user_id], kind: item[:kind]).first_or_create do |user|
