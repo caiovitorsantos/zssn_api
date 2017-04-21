@@ -1,9 +1,11 @@
 class InventoriesController < ApplicationController
 	before_action :set_inventoy, only: [:show, :update, :destroy, :add, :remove]
 
+	# GET /inventories
+	# GET /inventories.json
 	def index
 		unless User.healthy? params[:user_id]
-  	 	render json: {error: "Denied access. User is contaminated!"}, status: 403 and return
+  	 	render json: { error: "Denied access. User is contaminated!" }, status: 403 and return
   	end
 
 		inventory = Inventory.where(user_id: params[:user_id])
@@ -15,7 +17,7 @@ class InventoriesController < ApplicationController
 	def show
 		# Se o usuário não estiver infectado, exibe os itens do seu inventário
 		unless User.healthy? inventory_params[:user_id]
-  	 	render json: {error: "Denied access. User is contaminated!"}, status: 403 and return
+  	 	render json: { error: "Denied access. User is contaminated!" }, status: 403 and return
   	end
 
 		render json: @inventory, status: 200 
@@ -26,7 +28,7 @@ class InventoriesController < ApplicationController
 	def create
 		# se o usuário não entiver infectado e se já não existir, cria um novo inventário
 		unless User.healthy? inventory_params[:user_id]
-  	 	render json: {error: "Denied access. User is contaminated!"}, status: 403 and return
+  	 	render json: { error: "Denied access. User is contaminated!" }, status: 403 and return
   	end
 
 		inventory = Inventory.new(inventory_params)
@@ -36,7 +38,6 @@ class InventoriesController < ApplicationController
 		else
 			render json: inventory.errors, status: :unprocessable_entity
 		end
-			
 	end
 
 	# PUT /inventories/:id
@@ -44,7 +45,7 @@ class InventoriesController < ApplicationController
 	def update
 		# se o usuário não entiver infectado e se já não existir um igual salvo, atualiza o inventário
 		unless User.healthy? inventory_params[:user_id]
-  	 	render json: {error: "Denied access. User is contaminated!"}, status: 403 and return
+  	 	render json: { error: "Denied access. User is contaminated!" }, status: 403 and return
   	end
 
 		if @inventory.update(inventory_params)
@@ -74,49 +75,50 @@ class InventoriesController < ApplicationController
 	def add
 		# se o usuário não entiver infectado e já existir o inventário salvo, insere a qauantidade no inventário
 		unless User.healthy? inventory_params[:user_id]
-  	 	render json: {error: "Denied access. User is contaminated!"}, status: 403
+  	 	render json: { error: "Denied access. User is contaminated!" }, status: 403 and return
+		end
+
+		if @inventory.add(inventory_params[:amount].to_i)
+			render json: @inventory, status: 200
 		else
-			if @inventory.add(inventory_params[:amount].to_i)
-				render json: @inventory, status: 200
-			else
-				render json: @inventory.errors, status: :unprocessable_entity
-			end
-		end	
+			render json: @inventory.errors, status: :unprocessable_entity
+		end
 	end
 
 	# POST /inventories/:id/remove
 	# POST /inventories/:id/remove.json
 	def remove
-		# se o usuário não entiver infectado e já existir o inventário salvo, remove a qauantidade no inventário
+		# se o usuário não entiver infectado e já existir o inventário salvo, remove a quantidade no inventário
 		unless User.healthy? inventory_params[:user_id]
-  	 	render json: {error: "Denied access. User is contaminated!"}, status: 403
+  	 	render json: { error: "Denied access. User is contaminated!" }, status: 403 and return
+		end
+
+		if @inventory.remove(inventory_params[:amount].to_i)
+			render json: @inventory, status: 200
 		else
-			if @inventory.remove(inventory_params[:amount].to_i)
-				render json: @inventory, status: 200
-			else
-				render json: @inventory.errors, status: :unprocessable_entity
-			end
+			render json: @inventory.errors, status: :unprocessable_entity
 		end
 	end
 
 	# POST /inventories/:exchange
 	# POST /inventories/:exchange.json
 	def exchange
-		# se os usuários não entiverem infectados e os pontosdos items serem iguais, executa o escambo entre os usuários
-
+		# se os usuários não entiverem infectados e os pontos dos items serem iguais, executa o escambo entre os usuários
 		data_origin, data_destiny = origin_params, destiny_params
 
 		unless (User.healthy?(data_origin[:user_id]) && User.healthy?(data_destiny[:user_id]))
-  		render json: {error: "Denied access. User is contaminated!"}, status: 403 and return
+  		render json: { error: "Denied access. User is contaminated!" }, status: 403 and return
 		end
 
 		unless Inventory.equality(data_origin, data_destiny)
-			render json: {error: "The items points aren't equal!"}, status: 400 and return
+			render json: { error: "The items points aren't equal!" }, status: 400 and return
 		end
 
-		Inventory.exchange(data_origin, data_destiny)
-
-		render json: :success, status: 200
+		if Inventory.exchange(data_origin, data_destiny)
+			render json: :success, status: 200
+		else
+			render json: :error, status: 400
+		end
 	end
 
 	private

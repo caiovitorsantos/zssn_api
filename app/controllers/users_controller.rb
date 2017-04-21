@@ -88,31 +88,31 @@ class UsersController < ApplicationController
     infected_points = 0
 
     # Seleciona todos os usuários infectados e retorna sua porcentagem comparado com todos os usuários
-    infected_users = (User.where(healthy: false).count  * 100).to_f  / User.all.count
+    infected_users = (User.where(healthy: false).count * 100).to_f  / User.all.count
 
     # Seleciona todos os usuários saldáveis e retorna sua porcentagem comparado com todos os usuários
-    healthy_users = (User.where(healthy: true).count  * 100).to_f / User.all.count
+    healthy_users = (User.where(healthy: true).count * 100).to_f / User.all.count
 
     # Soma as quantidades de suprimentos agrupando-os pelo seu tipo, para cada tipo pelo total de usuários 
     Inventory.all
-      .group(:kind)
-      .sum(:amount)
-      .each { |inventory| avg_inventory[inventory[0]] = (inventory[1] / User.all.count).to_f }
+             .group(:kind)
+             .sum(:amount)
+             .each { |inventory| avg_inventory[inventory[0]] = (inventory[1] / User.all.count).to_f }
 
     # Soma os numeros de pontos de suprimentos pertencentes aos usuários infectados
-    Inventory.select(:kind, :amount).all
-      .joins(:user)
-      .where(users: {healthy: false})
-      .each { |inventory| infected_points += inventory.amount * inventory.get_point }
+    Inventory.select(:kind, :amount)
+             .all
+             .joins(:user)
+             .where(users: {healthy: false})
+             .each { |inventory| infected_points += inventory.amount * inventory.get_point }
 
-    render json:{ infected_users: infected_users,
-                  healthy_users: healthy_users,
-                  average_inventory_per_user: avg_inventory,
-                  points_of_infected_users: infected_points }
+    render json: { infected_users: infected_users,
+                   healthy_users: healthy_users,
+                   average_inventory_per_user: avg_inventory,
+                   points_of_infected_users: infected_points }
   end
 
   private
-
   	def set_user
   		@user = User.find(params[:id])
   	end
@@ -124,5 +124,4 @@ class UsersController < ApplicationController
     def users_location_params
 	  	params.require(:user).permit(:latitude, :longitude)
 	  end
-
 end

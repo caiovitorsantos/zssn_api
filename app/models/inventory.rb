@@ -1,5 +1,4 @@
 class Inventory < ApplicationRecord
-
   belongs_to :user
 
   # Associa os possíveis tipos de suprimentos com seu nome
@@ -48,20 +47,18 @@ class Inventory < ApplicationRecord
   def self.equality(data_origin, data_destiny)
     user_origin = User.find(data_origin[:user_id])
     user_destiny = User.find(data_destiny[:user_id])
-      
     user_origin.errors.add(:base, "The user is infected") and return false unless user_origin.healthy?
     user_destiny.errors.add(:base, "The user is infected") and return false unless user_destiny.healthy?
 
     points_origin = points_destiny = 0
 
     data_origin[:items].each do |item|
-        points_origin += item[:amount].to_i * @@points[Inventory.kinds[item[:kind]]]
+      points_origin += item[:amount].to_i * @@points[Inventory.kinds[item[:kind]]]
     end    
 
     data_destiny[:items].each do |item|
-        points_destiny += item[:amount].to_i * @@points[Inventory.kinds[item[:kind]]]
+      points_destiny += item[:amount].to_i * @@points[Inventory.kinds[item[:kind]]]
     end    
-      # binding.pry # puts "\n item: #{item}"
 
     points_origin == points_destiny    
   end
@@ -86,36 +83,15 @@ class Inventory < ApplicationRecord
         user.kind = item[:kind]
         user.amount ||= 0
       end
+
       inv_add.amount += item[:amount].to_i
       inv_sub.amount -= item[:amount].to_i
-
       inv_add.save
       inv_sub.save
     end
 
     self.exchange(data_destiny, data_origin, true) unless recursed
+
     return true
   end
-
 end
-=begin
-{
-  "origin":
-  {
-    "user_id":1,
-    "items":[
-      { "kind":0, "amount":3 },
-      { "kind":2, "amount":1 }
-    ]
-  },
-  "destiny":
-  {
-    "user_id":2,
-    "items":[
-      { "kind":0, "amount":3 },
-      { "kind":2, "amount":1 }
-    ]
-  }
-  
-}
-=end

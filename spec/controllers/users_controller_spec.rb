@@ -1,7 +1,6 @@
 require 'rails_helper'
 
 RSpec.describe UsersController, type: :controller do
-
   describe "GET #index" do
     before do
       request.env["HTTP_ACCEPT"] = "application/json"
@@ -22,9 +21,6 @@ RSpec.describe UsersController, type: :controller do
       it "returns http success" do
         post :create, params: {user: {name: FFaker::Name.name, age: 22, sex: :man, healthy: true, count_report: 0, latitude: 22.33234, longitude:  22.33234}}
         expect(response).to have_http_status(201)
-      end
-
-      it "save on database" do
       end
     end
   end
@@ -119,6 +115,4 @@ RSpec.describe UsersController, type: :controller do
       end
     end
   end
-
 end
-  

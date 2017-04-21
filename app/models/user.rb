@@ -1,7 +1,7 @@
 class User < ApplicationRecord
-
 	has_many :inventories
 
+	# Associa o tipo do gênero do usuário com o nome do gênero
 	enum sex: [:man, :woman]
 
 	# Atualiza a localização do usuário 
@@ -21,5 +21,4 @@ class User < ApplicationRecord
 	def self.healthy?(user_id)
 		User.find(user_id).healthy
 	end
-
 end
